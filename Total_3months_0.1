@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        Total_3months
+// @name        Total 3months
 // @namespace        http://tampermonkey.net/
 // @version        0.1
 // @description        アクセス解析3ヵ月分のデータを集計して表示する
