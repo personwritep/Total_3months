@@ -23,6 +23,10 @@ if(target){
 page_change();
 
 function page_change(){
+    let more=document.querySelector('.p-accessGraph__moreLinkBtn');
+    if(more){
+        more.click(); }
+
     let search=location.search;
     if(search.includes('unit=this_month') ||
        search.includes('unit=one_month_ago') || search.includes('unit=two_months_ago')){
@@ -33,7 +37,6 @@ function page_change(){
 
 
 function main(){
-
     let panel=
         '<div class="sw_panel">'+
         '<button class="m_sw">1</button>'+
@@ -75,7 +78,6 @@ function main(){
 
     function get_data(){
         let PAGLI=document.querySelectorAll('.p-accessAnalysisGraphListItem');
-
         for(let k=0; k<PAGLI.length; k++){
             let id;
             let title;
