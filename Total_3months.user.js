@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Total 3months
 // @namespace        http://tampermonkey.net/
-// @version        0.1
+// @version        0.2
 // @description        アクセス解析3ヵ月分のデータを集計して表示する
 // @author        Ameba Blog User
 // @match        https://blog.ameba.jp/ucs/analysis/analysis*
@@ -37,14 +37,15 @@ function page_change(){
 
 
 function main(){
+
     let panel=
         '<div class="sw_panel">'+
-        '<button class="m_sw">1</button>'+
-        '<button class="m_sw">2</button>'+
-        '<button class="m_sw">3</button>'+
         '<button class="disp">Total Display</button>'+
+        '<button class="m_sw"></button>'+
+        '<button class="m_sw"></button>'+
+        '<button class="m_sw"></button>'+
         '<style>.sw_panel { position: absolute; top: 50px; right: calc(50% - 465px); '+
-        'display: flex; flex-direction: row; '+
+        'display: flex; flex-direction: row-reverse; '+
         'padding: 4px 6px; border: 1px solid #aaa; background: #fff; } '+
         '.disp, .m_sw { font: bold 16px Meiryo; color: #000; padding: 2px 8px 0; margin: 0 6px; } '+
         '</style></div>';
@@ -55,6 +56,11 @@ function main(){
 
     let m_sw=document.querySelectorAll('.sw_panel .m_sw');
     if(m_sw.length==3){
+        let S_item=document.querySelectorAll('.c-radioSelect__item');
+        for(let k=0; k<3; k++){
+            let labelText=S_item[k+4].querySelector('.c-radioSelect__labelText');
+            if(labelText){
+                m_sw[k].textContent=labelText.textContent; }}
 
         m_sw[0].onclick=()=>{
             if(location.search.includes('unit=this_month')){
@@ -78,6 +84,7 @@ function main(){
 
     function get_data(){
         let PAGLI=document.querySelectorAll('.p-accessAnalysisGraphListItem');
+
         for(let k=0; k<PAGLI.length; k++){
             let id;
             let title;
@@ -111,12 +118,14 @@ function main(){
 
 
 
+
     let disp=document.querySelector('.sw_panel .disp');
     if(disp){
         disp.onclick=()=>{
             if(list_disp==0){
-                list_disp=1;
-                total_disp(); }
+                if(total.length!=0){
+                    list_disp=1;
+                    total_disp(); }}
             else{
                 list_disp=0;
                 if(document.querySelector('#t_panel')){
@@ -156,5 +165,6 @@ function main(){
             document.body.insertAdjacentHTML('beforeend', t_panel); }
 
     } // total_disp()
+
 
 } // main()
