@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Total 3months
 // @namespace        http://tampermonkey.net/
-// @version        0.2
+// @version        0.3
 // @description        アクセス解析3ヵ月分のデータを集計して表示する
 // @author        Ameba Blog User
 // @match        https://blog.ameba.jp/ucs/analysis/analysis*
@@ -23,15 +23,17 @@ if(target){
 page_change();
 
 function page_change(){
-    let more=document.querySelector('.p-accessGraph__moreLinkBtn');
-    if(more){
-        more.click(); }
-
     let search=location.search;
+    if(!search.includes('order=organic_click_desc')){
+        let more=document.querySelector('.p-accessGraph__moreLinkBtn');
+        if(more){
+            more.click(); }}
+
     if(search.includes('unit=this_month') ||
        search.includes('unit=one_month_ago') || search.includes('unit=two_months_ago')){
         setTimeout(()=>{
             main(); } ,800); }
+
 } // page_change()
 
 
@@ -125,11 +127,17 @@ function main(){
             if(list_disp==0){
                 if(total.length!=0){
                     list_disp=1;
+                    sort_data();
                     total_disp(); }}
             else{
                 list_disp=0;
                 if(document.querySelector('#t_panel')){
                     document.querySelector('#t_panel').remove(); }}}}
+
+
+
+    function sort_data(){
+        total.sort((a, b) => b[2] - a[2]); }
 
 
 
@@ -151,14 +159,13 @@ function main(){
             '<style>'+
             '#t_panel { position: fixed; top: 230px; right: 0; height: calc(100vh - 280px); '+
             'font: normal 14px/16px Meiryo; padding: 14px 12px; background: #fff; '+
-            'border: 1px solid #ccc; overflow-y: scroll; } '+
+            'border: 1px solid #ccc; overflow-y: scroll; overscroll-behavior-y: none; } '+
             '.li_total { height: 30px; } '+
             '.li_total a { padding: 4px 0 2px; color: #333; } '+
             '.li_total a:hover { text-decoration: none; background: #e2eef0; } '+
             '.title_total, .ac_total { display: inline-block; padding: 2px 6px; vertical-align: -6px; } '+
             '.title_total { width: 480px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; } '+
             '.ac_total { min-width: 60px; overflow: hidden; } '+
-
             '</style></div>';
 
         if(!document.querySelector('#t_panel')){
