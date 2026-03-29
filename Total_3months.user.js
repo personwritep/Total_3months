@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Total 3months
 // @namespace        http://tampermonkey.net/
-// @version        0.3
+// @version        0.4
 // @description        アクセス解析3ヵ月分のデータを集計して表示する
 // @author        Ameba Blog User
 // @match        https://blog.ameba.jp/ucs/analysis/analysis*
@@ -42,14 +42,16 @@ function main(){
 
     let panel=
         '<div class="sw_panel">'+
+        '<button class="disp_aside">Aside</button>'+
         '<button class="disp">Total Display</button>'+
         '<button class="m_sw"></button>'+
         '<button class="m_sw"></button>'+
         '<button class="m_sw"></button>'+
         '<style>.sw_panel { position: absolute; top: 50px; right: calc(50% - 465px); '+
-        'display: flex; flex-direction: row-reverse; '+
+        'z-index: 20; display: flex; flex-direction: row-reverse; '+
         'padding: 4px 6px; border: 1px solid #aaa; background: #fff; } '+
-        '.disp, .m_sw { font: bold 16px Meiryo; color: #000; padding: 2px 8px 0; margin: 0 6px; } '+
+        '.disp, .m_sw, .disp_aside { font: bold 16px Meiryo; color: #000; '+
+        'padding: 2px 8px 0; margin: 0 6px; } '+
         '</style></div>';
 
     if(!document.querySelector('.sw_panel')){
@@ -86,7 +88,6 @@ function main(){
 
     function get_data(){
         let PAGLI=document.querySelectorAll('.p-accessAnalysisGraphListItem');
-
         for(let k=0; k<PAGLI.length; k++){
             let id;
             let title;
@@ -120,19 +121,45 @@ function main(){
 
 
 
-
     let disp=document.querySelector('.sw_panel .disp');
     if(disp){
-        disp.onclick=()=>{
-            if(list_disp==0){
+        disp.addEventListener('click', function(event){
+            event.stopImmediatePropagation();
+            if(list_disp==0){ // 0:「非表示」 1:「Total」 2:「Aside」
                 if(total.length!=0){
                     list_disp=1;
                     sort_data();
                     total_disp(); }}
-            else{
+            else if(list_disp==1){ // 1:「Total」
                 list_disp=0;
                 if(document.querySelector('#t_panel')){
-                    document.querySelector('#t_panel').remove(); }}}}
+                    document.querySelector('#t_panel').remove(); }}
+            else if(list_disp==2){ // 2:「Aside」
+                total_disp_aside_del();
+                if(total.length!=0){
+                    list_disp=1;
+                    sort_data();
+                    total_disp(); }}}); }
+
+
+
+    let disp_aside=document.querySelector('.sw_panel .disp_aside');
+    if(disp_aside){
+        disp_aside.addEventListener('click', function(event){
+            event.stopImmediatePropagation();
+            if(list_disp==0){ // 0:「非表示」 1:「Total」 2:「Aside」
+                if(total.length!=0){
+                    list_disp=2;
+                    total_disp_aside(); }}
+            else if(list_disp==1){ // 1:「Total」
+                if(document.querySelector('#t_panel')){
+                    document.querySelector('#t_panel').remove(); }
+                if(total.length!=0){
+                    list_disp=2;
+                    total_disp_aside(); }}
+            else if(list_disp==2){ // 2:「Aside」
+                list_disp=0;
+                total_disp_aside_del(); }}); }
 
 
 
@@ -173,5 +200,47 @@ function main(){
 
     } // total_disp()
 
+
+
+    function total_disp_aside(){
+        let td_style=
+            '<style class="total_disp_style">'+
+            '.p-accessAnalysisGraphListItem { position: relative; } '+
+            '.assp { display: inline-block; position: absolute; top: 0; right: -60px; '+
+            'font: 14px/16px Meiryo; color: #333; height: 16px; padding: 8px 4px 6px; '+
+            'width: 50px; text-align: right; background: #fff; } '+
+            '</style>';
+
+        if(!document.querySelector('.total_disp_style')){
+            document.body.insertAdjacentHTML('beforeend', td_style); }
+
+
+        let PAGLI=document.querySelectorAll('.p-accessAnalysisGraphListItem');
+        for(let k=0; k<PAGLI.length; k++){
+            let assp='<span class="assp"></span>';
+            if(!PAGLI[k].querySelector('.assp')){
+                PAGLI[k].insertAdjacentHTML('beforeend', assp); }}
+
+
+        for(let k=0; k<PAGLI.length; k++){
+            let id;
+            let item_link=PAGLI[k].querySelector('.p-accessAnalysisGraphListItem__link');
+            if(item_link){
+                let url=new URL(item_link.href);
+                id=url.searchParams.get('id'); }
+            let index=total.findIndex(row=>row[0]==id);
+            if(index!=-1){
+                let assp=PAGLI[k].querySelector('.assp');
+                if(assp){
+                    assp.textContent=total[index][2]; }}}
+
+    } // total_disp_aside()
+
+
+
+    function total_disp_aside_del(){
+        let assp_all=document.querySelectorAll('.p-accessAnalysisGraphListItem .assp');
+        for(let k=0; k<assp_all.length; k++){
+            assp_all[k].remove(); }}
 
 } // main()
