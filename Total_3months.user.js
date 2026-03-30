@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Total 3months
 // @namespace        http://tampermonkey.net/
-// @version        0.5
+// @version        0.6
 // @description        アクセス解析3ヵ月分のデータを集計して表示する
 // @author        Ameba Blog User
 // @match        https://blog.ameba.jp/ucs/analysis*
@@ -49,17 +49,24 @@ function select_month(n){
 
 
 function main(){
+    let help_url='https://ameblo.jp/personwritep/entry-12961190627.html';
 
     let panel=
         '<div class="sw_panel">'+
-        '<button class="disp_aside">Aside</button>'+
-        '<button class="disp">Total Display</button>'+
         '<button class="scan">Scan</button>'+
-        '<style>.sw_panel { position: absolute; top: 8px; right: 30px; '+
-        'z-index: 20; display: flex; flex-direction: row-reverse; '+
-        'padding: 4px 6px; border: 1px solid #aaa; background: #fff; } '+
+        '<button class="disp">Total Display</button>'+
+        '<button class="disp_aside">Aside Display</button>'+
+        '<a href="'+ help_url +'" rel="noopener noreferrer" target="_blank">'+
+        '<p class="help_t3m">?</p></a>'+
+        '<style>'+
+        '.sw_panel { position: absolute; top: 8px; right: 30px; z-index: 20; '+
+        'padding: 4px 6px; border: 1px solid #aaa; background: #fff; '+
+        'box-shadow: -60px 0 0 4px #fff, 10px 0 0 4px #fff; } '+
         '.disp, .scan, .disp_aside { font: bold 16px Meiryo; color: #000; '+
         'padding: 2px 8px 0; margin: 0 6px; } '+
+        '.help_t3m { display: inline-block; font: bold 16px/18px Meiryo; '+
+        'height: 16px; padding: 3px 6px; margin: 3px 4px 0; '+
+        'border: 1px solid #999; border-radius: 20px; } '+
         '</style></div>';
 
     if(!document.querySelector('.sw_panel')){
@@ -68,7 +75,7 @@ function main(){
 
 
     let scan=document.querySelector('.sw_panel .scan');
-    if(scan){
+    if(scan && list_disp==0){
         scan.onclick=()=>{
             scan.style.display='none';
 
@@ -94,7 +101,12 @@ function main(){
                 }, 400);
             }, 2000);
 
-        }} // if(scan)
+        }} // if(scan && list_disp==0){
+
+
+
+    if(list_disp==2){
+        total_disp_aside(); } // 期間変更時に「Aside」表示の再表示が必要
 
 
 
@@ -105,17 +117,14 @@ function main(){
             if(list_disp==0){ // 0:「非表示」 1:「Total」 2:「Aside」
                 if(total.length!=0){
                     list_disp=1;
-                    sort_data();
                     total_disp(); }}
             else if(list_disp==1){ // 1:「Total」
                 list_disp=0;
-                if(document.querySelector('#t_panel')){
-                    document.querySelector('#t_panel').remove(); }}
+                total_disp_del(); }
             else if(list_disp==2){ // 2:「Aside」
                 total_disp_aside_del();
                 if(total.length!=0){
                     list_disp=1;
-                    sort_data();
                     total_disp(); }}}); }
 
 
@@ -129,8 +138,7 @@ function main(){
                     list_disp=2;
                     total_disp_aside(); }}
             else if(list_disp==1){ // 1:「Total」
-                if(document.querySelector('#t_panel')){
-                    document.querySelector('#t_panel').remove(); }
+                total_disp_del();
                 if(total.length!=0){
                     list_disp=2;
                     total_disp_aside(); }}
@@ -182,6 +190,8 @@ function sort_data(){
 
 
 function total_disp(){
+    sort_data();
+
     let t_panel=
         '<div id="t_panel">'+
         '<ul>';
@@ -212,6 +222,12 @@ function total_disp(){
         document.body.insertAdjacentHTML('beforeend', t_panel); }
 
 } // total_disp()
+
+
+
+function total_disp_del(){
+    if(document.querySelector('#t_panel')){
+        document.querySelector('#t_panel').remove(); }}
 
 
 
