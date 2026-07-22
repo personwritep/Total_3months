@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Total 3months
 // @namespace        http://tampermonkey.net/
-// @version        0.6
+// @version        0.7
 // @description        アクセス解析3ヵ月分のデータを集計して表示する
 // @author        Ameba Blog User
 // @match        https://blog.ameba.jp/ucs/analysis*
@@ -59,13 +59,13 @@ function main(){
         '<a href="'+ help_url +'" rel="noopener noreferrer" target="_blank">'+
         '<p class="help_t3m">?</p></a>'+
         '<style>'+
-        '.sw_panel { position: absolute; top: 8px; right: 30px; z-index: 20; '+
-        'padding: 4px 6px; border: 1px solid #aaa; background: #fff; '+
-        'box-shadow: -60px 0 0 4px #fff, 10px 0 0 4px #fff; } '+
-        '.disp, .scan, .disp_aside { font: bold 16px Meiryo; color: #000; '+
-        'padding: 2px 8px 0; margin: 0 6px; } '+
+        '.sw_panel { position: absolute; top: 16px; right: 30px; z-index: 20; '+
+        'display: flex; align-items: center; } '+
+        '.disp, .scan, .disp_aside { font: normal 16px/24px Meiryo; color: #000; '+
+        'padding: 0 8px; margin: 0 6px; height: 24px; background: #fff; '+
+        'border: 1px solid #009688; border-radius: 3px; } '+
         '.help_t3m { display: inline-block; font: bold 16px/18px Meiryo; '+
-        'height: 16px; padding: 3px 6px; margin: 3px 4px 0; '+
+        'height: 15px; padding: 1px 4px; margin: 0 4px; '+
         'border: 1px solid #999; border-radius: 20px; } '+
         '</style></div>';
 
@@ -100,6 +100,10 @@ function main(){
                     get_data();
                 }, 400);
             }, 2000);
+
+            setTimeout(()=>{
+                select_month(0);
+            }, 3000);
 
         }} // if(scan && list_disp==0){
 
@@ -237,7 +241,9 @@ function total_disp_aside(){
         '.p-accessAnalysisGraphListItem { position: relative; } '+
         '.assp { display: inline-block; position: absolute; top: 0; right: -60px; '+
         'font: 14px/16px Meiryo; color: #333; height: 16px; padding: 8px 4px 6px; '+
-        'width: 50px; text-align: right; background: #fff; } '+
+        'width: 50px; text-align: right; background: #fff; border-right: 1px solid #ccc; } '+
+        '.assp._top { top: -9px; padding-top: 16px; border-top: 1px solid #e2e2e2; } '+
+        '.assp._bottom { padding-bottom: 14px; border-bottom: 1px solid #e2e2e2; } '+
         '</style>';
 
     if(!document.querySelector('.total_disp_style')){
@@ -249,6 +255,15 @@ function total_disp_aside(){
         let assp='<span class="assp"></span>';
         if(!PAGLI[k].querySelector('.assp')){
             PAGLI[k].insertAdjacentHTML('beforeend', assp); }}
+
+    let all_assp=document.querySelectorAll('.assp');
+    let assp_top=all_assp[0];
+    if(assp_top){
+        assp_top.classList.add('_top'); }
+
+    let assp_bottom=all_assp[all_assp.length-1];
+    if(assp_bottom){
+        assp_bottom.classList.add('_bottom'); }
 
 
     for(let k=0; k<PAGLI.length; k++){
