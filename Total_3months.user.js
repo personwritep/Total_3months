@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Total 3months
 // @namespace        http://tampermonkey.net/
-// @version        0.7
+// @version        0.8
 // @description        アクセス解析3ヵ月分のデータを集計して表示する
 // @author        Ameba Blog User
 // @match        https://blog.ameba.jp/ucs/analysis*
@@ -14,6 +14,12 @@
 
 let total=[]; // データ総計用 配列
 let list_disp=0; // リストの表示フラグ
+
+let read_json=sessionStorage.getItem('Total_3'); // セッションストレージ保存名
+total=JSON.parse(read_json);
+if(total==null){ total=[]; } // 🔴 集計データを読込み
+
+
 
 let target=document.querySelector('#root > div');
 let monitor=new MutationObserver(page_change);
@@ -30,6 +36,8 @@ function page_change(){
             open_more();
             setTimeout(()=>{
                 main(); } ,600); }}
+    else if(path.includes('analysis_page_detail.do')){
+        sw_panel_close(); }
 
 } // page_change()
 
@@ -41,10 +49,10 @@ function open_more(){
         more.click(); }}
 
 
-function select_month(n){
-    let S_radio=document.querySelectorAll('.c-radioSelect__radio');
-    if(S_radio[n]){
-        S_radio[n].click(); }}
+function sw_panel_close(){
+    let sw_panel=document.querySelector('.sw_panel');
+    if(sw_panel){
+        sw_panel.remove(); }}
 
 
 
@@ -73,10 +81,15 @@ function main(){
         document.querySelector('#ucsContent').insertAdjacentHTML('beforeend', panel); }
 
 
+    disp_able();
+
 
     let scan=document.querySelector('.sw_panel .scan');
     if(scan && list_disp==0){
         scan.onclick=()=>{
+            total=[];
+            sessionStorage.removeItem('Total_3'); // 🔴 集計データのセッションストレージをリセット
+
             scan.style.display='none';
 
             select_month(4);
@@ -103,11 +116,18 @@ function main(){
 
             setTimeout(()=>{
                 select_month(0);
+                let write_json=JSON.stringify(total); // 🔴 集計データをストレージ保存
+                sessionStorage.setItem('Total_3', write_json); // セッションストレージ保存名
+                disp_able();
             }, 3000);
 
+
+            function select_month(n){
+                let S_radio=document.querySelectorAll('.c-radioSelect__radio');
+                if(S_radio[n]){
+                    S_radio[n].click(); }}
+
         }} // if(scan && list_disp==0){
-
-
 
     if(list_disp==2){
         total_disp_aside(); } // 期間変更時に「Aside」表示の再表示が必要
@@ -149,6 +169,19 @@ function main(){
             else if(list_disp==2){ // 2:「Aside」
                 list_disp=0;
                 total_disp_aside_del(); }}); }
+
+
+
+    function disp_able(){
+        let disp=document.querySelector('.sw_panel .disp');
+        let disp_aside=document.querySelector('.sw_panel .disp_aside');
+        if(disp && disp_aside){
+            if(total.length==0){
+                disp.style.opacity='0.4';
+                disp_aside.style.opacity='0.4'; }
+            else{
+                disp.style.opacity='1';
+                disp_aside.style.opacity='1'; }}}
 
 } // main()
 
