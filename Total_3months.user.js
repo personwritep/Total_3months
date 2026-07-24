@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Total 3months
 // @namespace        http://tampermonkey.net/
-// @version        0.8
+// @version        0.9
 // @description        アクセス解析3ヵ月分のデータを集計して表示する
 // @author        Ameba Blog User
 // @match        https://blog.ameba.jp/ucs/analysis*
@@ -244,6 +244,9 @@ function total_disp(){
     t_panel+=
         '</ul>'+
         '<style>'+
+        '#ucsContent { width: 870px; margin-left: 0; } '+
+        '#ucsMainContent { position: absolute; background: #fff; } '+
+        '#ucsSubMenu { left: 360px !important; } '+
         '#t_panel { position: fixed; top: 230px; right: 0; height: calc(100vh - 280px); '+
         'font: normal 14px/16px Meiryo; padding: 14px 12px; background: #fff; '+
         'border: 1px solid #ccc; overflow-y: scroll; overscroll-behavior-y: none; } '+
@@ -271,6 +274,7 @@ function total_disp_del(){
 function total_disp_aside(){
     let td_style=
         '<style class="total_disp_style">'+
+        '#ucsContent { border-right-color: transparent; box-shadow: 40px 0 0 #fff; } '+
         '.p-accessAnalysisGraphListItem { position: relative; } '+
         '.assp { display: inline-block; position: absolute; top: 0; right: -60px; '+
         'font: 14px/16px Meiryo; color: #333; height: 16px; padding: 8px 4px 6px; '+
@@ -318,4 +322,7 @@ function total_disp_aside(){
 function total_disp_aside_del(){
     let assp_all=document.querySelectorAll('.p-accessAnalysisGraphListItem .assp');
     for(let k=0; k<assp_all.length; k++){
-        assp_all[k].remove(); }}
+        assp_all[k].remove(); }
+
+    if(document.querySelector('.total_disp_style')){
+        document.querySelector('.total_disp_style').remove(); }}
