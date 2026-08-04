@@ -68,7 +68,7 @@ function main(){
         '<p class="help_t3m">?</p></a>'+
         '<style>'+
         '.sw_panel { position: absolute; top: 16px; right: 30px; z-index: 20; '+
-        'display: flex; align-items: center; } '+
+        'display: flex; align-items: center; background: #fff; outline: 6px solid #fff; } '+
         '.disp, .scan, .disp_aside { font: normal 16px/24px Meiryo; color: #000; '+
         'padding: 0 8px; margin: 0 6px; height: 24px; background: #fff; '+
         'border: 1px solid #009688; border-radius: 3px; } '+
