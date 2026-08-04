@@ -260,7 +260,7 @@ function total_disp(){
         '#ucsSubMenu { left: 360px !important; } '+
         '#t_panel { position: fixed; top: 230px; right: 0; height: calc(100vh - 280px); '+
         'font: normal 14px/16px Meiryo; padding: 14px 12px; background: #fff; '+
-        'border: 1px solid #ccc; overflow-y: scroll; overscroll-behavior-y: none; } '+
+        'border: 1px solid #ccc; overflow-y: scroll; overscroll-behavior-y: none; z-index: 11; } '+
         '.li_total { height: 30px; } '+
         '.li_total a { padding: 4px 0 2px; color: #333; } '+
         '.li_total a:hover { text-decoration: none; background: #e2eef0; } '+
