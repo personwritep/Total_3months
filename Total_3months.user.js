@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Total 3months
 // @namespace        http://tampermonkey.net/
-// @version        0.9
+// @version        1.0
 // @description        アクセス解析3ヵ月分のデータを集計して表示する
 // @author        Ameba Blog User
 // @match        https://blog.ameba.jp/ucs/analysis*
@@ -89,43 +89,53 @@ function main(){
         scan.onclick=()=>{
             total=[];
             sessionStorage.removeItem('Total_3'); // 🔴 集計データのセッションストレージをリセット
-
             scan.style.display='none';
 
-            select_month(4);
-            setTimeout(()=>{
-                open_more();
-                get_data();
-            }, 400);
 
-            setTimeout(()=>{
-                select_month(5);
-                setTimeout(()=>{
-                    open_more();
-                    get_data();
-                }, 400);
-            }, 1000);
+            let sleep=(ms)=> new Promise(resolve=> setTimeout(resolve, ms));
 
-            setTimeout(()=>{
-                select_month(6);
-                setTimeout(()=>{
-                    open_more();
-                    get_data();
-                }, 400);
-            }, 2000);
+            async function runSequence(){
+                await select_month(4);
+                await sleep(600);
+                await select_month(5);
+                await sleep(600);
+                await select_month(6);
+                await sleep(600);
+                await select_home(); }
 
-            setTimeout(()=>{
-                select_month(0);
-                let write_json=JSON.stringify(total); // 🔴 集計データをストレージ保存
-                sessionStorage.setItem('Total_3', write_json); // セッションストレージ保存名
-                disp_able();
-            }, 3000);
+            runSequence();
 
 
             function select_month(n){
                 let S_radio=document.querySelectorAll('.c-radioSelect__radio');
                 if(S_radio[n]){
-                    S_radio[n].click(); }}
+                    S_radio[n].click();
+
+                    let retry=0;
+                    let interval=setInterval(wait_target, 200);
+                    function wait_target(){
+                        retry++;
+                        if(retry>10){
+                            clearInterval(interval); }
+                        let target_ul=document.querySelector('.p-accessGraph__graph ul'); // 監視 target
+                        if(target_ul){
+                            clearInterval(interval);
+                            get_data(target_ul); }}
+
+                }} // select_month()
+
+
+
+            function select_home(){
+                let S_radio=document.querySelectorAll('.c-radioSelect__radio');
+                if(S_radio[0]){
+                    S_radio[0].click(); //「今日」のデータを表示
+
+                    let write_json=JSON.stringify(total); // 🔴 集計データをストレージ保存
+                    sessionStorage.setItem('Total_3', write_json); // セッションストレージ保存名
+                    disp_able();
+
+                }} // select_month_home()
 
         }} // if(scan && list_disp==0){
 
@@ -187,8 +197,8 @@ function main(){
 
 
 
-function get_data(){
-    let PAGLI=document.querySelectorAll('.p-accessAnalysisGraphListItem');
+function get_data(ul){
+    let PAGLI=ul.querySelectorAll('.p-accessAnalysisGraphListItem');
     for(let k=0; k<PAGLI.length; k++){
         let id;
         let title;
@@ -205,7 +215,8 @@ function get_data(){
 
         let item_count=PAGLI[k].querySelector('.p-accessAnalysisGraphListItem__count');
         if(item_count){
-            ac_count=item_count.textContent/1; } // 数値化
+            let count_nc=item_count.textContent.replace(/,/g, '');
+            ac_count=parseInt(count_nc, 10); } // 数値化
 
         add_data(id, title, ac_count); }
 
@@ -255,7 +266,7 @@ function total_disp(){
         '.li_total a:hover { text-decoration: none; background: #e2eef0; } '+
         '.title_total, .ac_total { display: inline-block; padding: 2px 6px; vertical-align: -6px; } '+
         '.title_total { width: 480px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; } '+
-        '.ac_total { min-width: 60px; overflow: hidden; } '+
+        '.ac_total { min-width: 60px; overflow: hidden; text-align: right; } '+
         '</style></div>';
 
     if(!document.querySelector('#t_panel')){
